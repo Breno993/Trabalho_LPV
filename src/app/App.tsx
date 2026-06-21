@@ -89,7 +89,7 @@ function DiffBadge({ d }: { d: Difficulty }) {
 
 function EmptyState({ onNew }: { onNew: () => void }) {
   return (
-    <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
+    <div className="flex flex-col items-center justify-center py-24 gap-4 text-center col-span-full">
       <BookOpen size={48} className="text-stone-300" />
       <p className="text-stone-500 text-base">Nenhuma receita encontrada.</p>
       <button onClick={onNew} className="mt-2 px-5 py-2 rounded-xl bg-orange-500 text-white font-semibold text-sm hover:bg-orange-600 transition-colors">
@@ -144,8 +144,11 @@ function RecipeForm({
   const err = "text-xs text-red-500 mt-0.5";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-4" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
+      onClick={e => e.target === e.currentTarget && onClose()}
+    >
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[92vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100 sticky top-0 bg-white z-10 rounded-t-2xl">
           <h2 className="font-bold text-stone-800 text-base">{initial ? "Editar receita" : "Nova receita"}</h2>
@@ -153,7 +156,7 @@ function RecipeForm({
         </div>
 
         <div className="p-5 flex flex-col gap-4">
-          {/* Emoji + cor */}
+          {/* Emoji + nome */}
           <div className="flex gap-3 items-start">
             <div className={field} style={{ flex: "0 0 auto" }}>
               <span className={label}>Ícone</span>
@@ -260,73 +263,85 @@ function RecipeDetail({
 
   return (
     <div className="min-h-screen bg-stone-50">
-      {/* Hero */}
-      <div className="relative h-48 flex items-end pb-6 px-5" style={{ background: recipe.color }}>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
-        <div className="relative z-10 flex items-end justify-between w-full">
-          <div>
-            <span className="text-4xl">{recipe.emoji}</span>
-            <h1 className="text-white font-bold text-2xl mt-2 leading-tight">{recipe.name}</h1>
+      <div className="max-w-3xl mx-auto">
+        {/* Hero */}
+        <div className="relative h-48 md:h-64 flex items-end pb-6 px-5" style={{ background: recipe.color }}>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
+          <div className="relative z-10 flex items-end justify-between w-full">
+            <div>
+              <span className="text-4xl md:text-5xl">{recipe.emoji}</span>
+              <h1 className="text-white font-bold text-2xl md:text-3xl mt-2 leading-tight">{recipe.name}</h1>
+            </div>
+          </div>
+          <button onClick={onBack} className="absolute top-4 left-4 z-10 p-2 bg-white/20 backdrop-blur-sm rounded-xl text-white hover:bg-white/30 transition-colors">
+            <ArrowLeft size={20} />
+          </button>
+          <button onClick={onToggleFav} className="absolute top-4 right-4 z-10 p-2 bg-white/20 backdrop-blur-sm rounded-xl text-white hover:bg-white/30 transition-colors">
+            <Heart size={20} fill={recipe.favorite ? "white" : "none"} />
+          </button>
+        </div>
+
+        {/* Meta pills */}
+        <div className="flex gap-2 px-5 py-4 flex-wrap bg-white md:bg-transparent">
+          <span className="flex items-center gap-1.5 bg-white border border-stone-200 rounded-full px-3 py-1 text-sm text-stone-600">
+            <Clock size={14} className="text-orange-400" /> {recipe.prepTime} min
+          </span>
+          <span className="flex items-center gap-1.5 bg-white border border-stone-200 rounded-full px-3 py-1 text-sm text-stone-600">
+            <ChefHat size={14} className="text-orange-400" /> {recipe.category}
+          </span>
+          <DiffBadge d={recipe.difficulty} />
+        </div>
+
+        {/* Content */}
+        <div className="px-5 pb-32 md:pb-6 flex flex-col gap-6">
+          {/* Ingredientes */}
+          <section className="bg-white md:rounded-2xl md:p-5 md:shadow-sm md:border md:border-stone-100 -mx-5 px-5 py-4 md:mx-0">
+            <h2 className="font-bold text-stone-800 text-base mb-3">Ingredientes</h2>
+            <ul className="flex flex-col gap-2">
+              {ingredients.map((ing, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="w-5 h-5 rounded-full border-2 border-orange-300 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="w-2 h-2 rounded-full bg-orange-400" />
+                  </span>
+                  <span className="text-stone-600 text-sm leading-relaxed">{ing}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* Modo de preparo */}
+          <section className="bg-white md:rounded-2xl md:p-5 md:shadow-sm md:border md:border-stone-100 -mx-5 px-5 py-4 md:mx-0">
+            <h2 className="font-bold text-stone-800 text-base mb-3">Modo de preparo</h2>
+            <ol className="flex flex-col gap-3">
+              {steps.map((step, i) => (
+                <li key={i} className="flex gap-3">
+                  <span className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+                  <span className="text-stone-600 text-sm leading-relaxed">{step.replace(/^\d+\.\s*/, "")}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          {/* Actions - visible inline on desktop only */}
+          <div className="hidden md:flex gap-3 pb-4">
+            <button onClick={onEdit} className="flex-1 py-3 rounded-xl border border-stone-200 text-stone-700 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors">
+              <Edit3 size={16} /> Editar
+            </button>
+            <button onClick={onDelete} className="py-3 px-6 rounded-xl border border-red-100 bg-red-50 text-red-500 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-red-100 transition-colors">
+              <Trash2 size={16} /> Excluir
+            </button>
           </div>
         </div>
-        <button onClick={onBack} className="absolute top-4 left-4 z-10 p-2 bg-white/20 backdrop-blur-sm rounded-xl text-white hover:bg-white/30 transition-colors">
-          <ArrowLeft size={20} />
-        </button>
-        <button onClick={onToggleFav} className="absolute top-4 right-4 z-10 p-2 bg-white/20 backdrop-blur-sm rounded-xl text-white hover:bg-white/30 transition-colors">
-          <Heart size={20} fill={recipe.favorite ? "white" : "none"} />
-        </button>
-      </div>
 
-      {/* Meta pills */}
-      <div className="flex gap-2 px-5 py-4 flex-wrap">
-        <span className="flex items-center gap-1.5 bg-white border border-stone-200 rounded-full px-3 py-1 text-sm text-stone-600">
-          <Clock size={14} className="text-orange-400" /> {recipe.prepTime} min
-        </span>
-        <span className="flex items-center gap-1.5 bg-white border border-stone-200 rounded-full px-3 py-1 text-sm text-stone-600">
-          <ChefHat size={14} className="text-orange-400" /> {recipe.category}
-        </span>
-        <DiffBadge d={recipe.difficulty} />
-      </div>
-
-      {/* Content */}
-      <div className="px-5 pb-32 flex flex-col gap-6">
-        {/* Ingredientes */}
-        <section>
-          <h2 className="font-bold text-stone-800 text-base mb-3">Ingredientes</h2>
-          <ul className="flex flex-col gap-2">
-            {ingredients.map((ing, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span className="w-5 h-5 rounded-full border-2 border-orange-300 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="w-2 h-2 rounded-full bg-orange-400" />
-                </span>
-                <span className="text-stone-600 text-sm leading-relaxed">{ing}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* Modo de preparo */}
-        <section>
-          <h2 className="font-bold text-stone-800 text-base mb-3">Modo de preparo</h2>
-          <ol className="flex flex-col gap-3">
-            {steps.map((step, i) => (
-              <li key={i} className="flex gap-3">
-                <span className="w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
-                <span className="text-stone-600 text-sm leading-relaxed">{step.replace(/^\d+\.\s*/, "")}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-      </div>
-
-      {/* Bottom actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-100 px-5 py-4 flex gap-3">
-        <button onClick={onEdit} className="flex-1 py-3 rounded-xl border border-stone-200 text-stone-700 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors">
-          <Edit3 size={16} /> Editar
-        </button>
-        <button onClick={onDelete} className="py-3 px-4 rounded-xl border border-red-100 bg-red-50 text-red-500 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-red-100 transition-colors">
-          <Trash2 size={16} />
-        </button>
+        {/* Bottom actions - mobile only (fixed) */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-stone-100 px-5 py-4 flex gap-3">
+          <button onClick={onEdit} className="flex-1 py-3 rounded-xl border border-stone-200 text-stone-700 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-stone-50 transition-colors">
+            <Edit3 size={16} /> Editar
+          </button>
+          <button onClick={onDelete} className="py-3 px-4 rounded-xl border border-red-100 bg-red-50 text-red-500 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-red-100 transition-colors">
+            <Trash2 size={16} />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -337,13 +352,13 @@ function RecipeDetail({
 function RecipeCard({ recipe, onClick, onFav }: { recipe: Recipe; onClick: () => void; onFav: (e: React.MouseEvent) => void }) {
   return (
     <div onClick={onClick} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all active:scale-95">
-      <div className="h-28 flex items-center justify-center text-5xl relative" style={{ background: recipe.color + "22" }}>
+      <div className="h-28 md:h-36 flex items-center justify-center text-5xl md:text-6xl relative" style={{ background: recipe.color + "22" }}>
         <span>{recipe.emoji}</span>
         <button onClick={onFav} className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 hover:bg-white transition-colors">
           <Heart size={14} className={recipe.favorite ? "fill-red-400 text-red-400" : "text-stone-300"} />
         </button>
       </div>
-      <div className="p-3">
+      <div className="p-3 md:p-4">
         <p className="font-semibold text-stone-800 text-sm leading-tight mb-2">{recipe.name}</p>
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1 text-xs text-stone-400">
@@ -404,13 +419,20 @@ export default function App() {
     const recipe = recipes.find(r => r.id === view.id);
     if (!recipe) { setView({ screen: "list" }); return null; }
     return (
-      <RecipeDetail
-        recipe={recipe}
-        onBack={() => setView({ screen: "list" })}
-        onEdit={() => setView({ screen: "form", id: recipe.id })}
-        onDelete={() => deleteRecipe(recipe.id)}
-        onToggleFav={() => toggleFav(recipe.id)}
-      />
+      <>
+        <RecipeDetail
+          recipe={recipe}
+          onBack={() => setView({ screen: "list" })}
+          onEdit={() => setView({ screen: "form", id: recipe.id })}
+          onDelete={() => deleteRecipe(recipe.id)}
+          onToggleFav={() => toggleFav(recipe.id)}
+        />
+        {toast && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-800 text-white text-sm px-4 py-2 rounded-full shadow-lg">
+            {toast}
+          </div>
+        )}
+      </>
     );
   }
 
@@ -419,7 +441,6 @@ export default function App() {
     const initial = view.id ? recipes.find(r => r.id === view.id) : undefined;
     return (
       <>
-        {/* keep list visible behind modal */}
         <RecipeForm
           initial={initial}
           onSave={saveRecipe}
@@ -437,57 +458,68 @@ export default function App() {
   // ── List screen ──
   return (
     <div className="min-h-screen bg-stone-50" style={{ fontFamily: "system-ui, sans-serif" }}>
-      {/* Header */}
-      <div className="bg-white border-b border-stone-100 px-5 pt-6 pb-4 sticky top-0 z-20">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-xl font-bold text-stone-800">ReceitaApp</h1>
-            <p className="text-xs text-stone-400">{recipes.length} receitas salvas</p>
-          </div>
-          <button onClick={() => setView({ screen: "form" })}
-            className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors shadow-sm shadow-orange-200">
-            <Plus size={16} /> Nova receita
-          </button>
-        </div>
-
-        {/* Search */}
-        <div className="relative mb-3">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar receitas..."
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:bg-white transition-all" />
-        </div>
-
-        {/* Category tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          {CATEGORIES.map(c => (
-            <button key={c} onClick={() => setCat(c)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all
-                ${cat === c ? "bg-orange-500 text-white shadow-sm" : "bg-stone-100 text-stone-500 hover:bg-stone-200"}`}>
-              {c}
+      {/* Header - full width bg, conteúdo centralizado */}
+      <div className="bg-white border-b border-stone-100 sticky top-0 z-20">
+        <div className="max-w-5xl mx-auto px-5 pt-5 pb-4">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-xl font-bold text-stone-800">🍽️ ReceitaApp</h1>
+              <p className="text-xs text-stone-400">{recipes.length} receitas salvas</p>
+            </div>
+            <button
+              onClick={() => setView({ screen: "form" })}
+              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors shadow-sm shadow-orange-200"
+            >
+              <Plus size={16} />
+              <span className="hidden sm:inline">Nova receita</span>
+              <span className="sm:hidden">Nova</span>
             </button>
-          ))}
+          </div>
+
+          {/* Search */}
+          <div className="relative mb-3">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar receitas..."
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-stone-200 bg-stone-50 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:bg-white transition-all"
+            />
+          </div>
+
+          {/* Category tabs */}
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {CATEGORIES.map(c => (
+              <button key={c} onClick={() => setCat(c)}
+                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all
+                  ${cat === c ? "bg-orange-500 text-white shadow-sm" : "bg-stone-100 text-stone-500 hover:bg-stone-200"}`}>
+                {c}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="px-5 py-5">
-        {filtered.length === 0
-          ? <EmptyState onNew={() => setView({ screen: "form" })} />
-          : (
-            <div className="grid grid-cols-2 gap-3">
-              {filtered.map(r => (
-                <RecipeCard key={r.id} recipe={r}
+      {/* Grid - centralizado com breakpoints */}
+      <div className="max-w-5xl mx-auto px-5 py-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+          {filtered.length === 0
+            ? <EmptyState onNew={() => setView({ screen: "form" })} />
+            : filtered.map(r => (
+                <RecipeCard
+                  key={r.id}
+                  recipe={r}
                   onClick={() => setView({ screen: "detail", id: r.id })}
-                  onFav={e => { e.stopPropagation(); toggleFav(r.id); }} />
-              ))}
-            </div>
-          )}
+                  onFav={e => { e.stopPropagation(); toggleFav(r.id); }}
+                />
+              ))
+          }
+        </div>
       </div>
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-800 text-white text-sm px-4 py-2 rounded-full shadow-lg animate-fade-in">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-800 text-white text-sm px-4 py-2 rounded-full shadow-lg">
           {toast}
         </div>
       )}
